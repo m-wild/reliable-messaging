@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MediatR;
+using Api.Middleware;
 
 namespace Api
 {
@@ -27,6 +28,7 @@ namespace Api
             services.AddMvc();
 
             services.AddMediatR(typeof(Startup));
+            // services.AddScoped(typeof(IPipelineBehavior<,>), typeof(Deduplication<,>));
 
             services.Configure<Settings>(Configuration.GetSection("Settings"));
 

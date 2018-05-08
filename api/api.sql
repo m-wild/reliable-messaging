@@ -27,3 +27,10 @@ CREATE TABLE IF NOT EXISTS communication (
     template_key CITEXT NOT NULL,
     payload CITEXT NULL
 );
+
+
+
+
+
+insert into communication (customer_id, template_key) values (gen_random_uuid(), 'foo')
+returning communication_id;
