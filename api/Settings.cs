@@ -4,8 +4,7 @@ namespace Api
     {
         public string DbConnectionString { get; set; }
 
-        public string MqHost { get; set; }
+        public string MqHostname { get; set; }
 
-        public string MqPort { get; set; }
     }
 }

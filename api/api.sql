@@ -1,8 +1,8 @@
 /* -- rollback
 
-DROP TABLE communication;
-DROP TABLE event;
-DROP TABLE request;
+DROP TABLE Communication;
+DROP TABLE Event;
+DROP TABLE Request;
 DROP EXTENSION citext;
 DROP EXTENSION pgcrypto;
 */
@@ -10,27 +10,29 @@ DROP EXTENSION pgcrypto;
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 CREATE EXTENSION IF NOT EXISTS citext;
 
-CREATE TABLE IF NOT EXISTS request (
-    request_id UUID NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
-    created_at TIMESTAMP NOT NULL DEFAULT current_timestamp
+CREATE TABLE IF NOT EXISTS Request (
+    RequestId UUID NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
+    CreatedAt TIMESTAMP NOT NULL DEFAULT current_timestamp
 );
 
-CREATE TABLE IF NOT EXISTS event (
-    event_id UUID NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
-    created_at TIMESTAMP NOT NULL DEFAULT current_timestamp,
-    payload JSON NULL
+CREATE TABLE IF NOT EXISTS Event (
+    EventId UUID NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
+    RequestId UUID NOT NULL REFERENCES Request (RequestId),
+    CreatedAt TIMESTAMP NOT NULL DEFAULT current_timestamp,
+    SentAt TIMESTAMP NULL,
+    Key CITEXT NOT NULL,
+    Payload JSON NULL
 );
 
-CREATE TABLE IF NOT EXISTS communication (
-    communication_id UUID NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
-    customer_id UUID NOT NULL,
-    template_key CITEXT NOT NULL,
-    payload CITEXT NULL
+CREATE TABLE IF NOT EXISTS Communication (
+    CommunicationId UUID NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
+    CustomerId UUID NOT NULL,
+    TemplateKey CITEXT NOT NULL,
+    Payload CITEXT NULL
 );
 
 
 
-
-
-insert into communication (customer_id, template_key) values (gen_random_uuid(), 'foo')
-returning communication_id;
+SELECT * FROM Request;
+SELECT * FROM Event;
+SELECT * FROM Communication;

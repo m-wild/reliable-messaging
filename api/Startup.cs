@@ -31,8 +31,6 @@ namespace Api
             // services.AddScoped(typeof(IPipelineBehavior<,>), typeof(Deduplication<,>));
 
             services.Configure<Settings>(Configuration.GetSection("Settings"));
-
-            Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
