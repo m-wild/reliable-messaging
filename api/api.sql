@@ -34,10 +34,9 @@ CREATE TABLE IF NOT EXISTS Communication (
 );
 
 
-
-SELECT * FROM Request;
-SELECT * FROM Event;
-SELECT * FROM Communication;
+-- SELECT * FROM Request;
+-- SELECT * FROM Event;
+-- SELECT * FROM Communication;
 
 CREATE SCHEMA Backend;
 
@@ -46,6 +45,6 @@ CREATE TABLE Backend.Processed (
     CreatedAt TIMESTAMP NOT NULL DEFAULT current_timestamp
 );
 
-SELECT * FROM Backend.Processed;
+-- SELECT * FROM Backend.Processed;
 
 
