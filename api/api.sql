@@ -1,4 +1,6 @@
 /* -- rollback
+DROP TABLE Backend.Processed;
+DROP SCHEMA Backend;
 
 DROP TABLE Communication;
 DROP TABLE Event;
@@ -36,3 +38,14 @@ CREATE TABLE IF NOT EXISTS Communication (
 SELECT * FROM Request;
 SELECT * FROM Event;
 SELECT * FROM Communication;
+
+CREATE SCHEMA Backend;
+
+CREATE TABLE Backend.Processed (
+    EventId UUID NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
+    CreatedAt TIMESTAMP NOT NULL DEFAULT current_timestamp
+);
+
+SELECT * FROM Backend.Processed;
+
+

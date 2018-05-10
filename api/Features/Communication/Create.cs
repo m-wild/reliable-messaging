@@ -72,14 +72,16 @@ namespace Api.Features.Communication
                         // 4. Save events to DB
                         var createdEvent = new Create.Event
                         {
+                            EventId = Guid.NewGuid(),
                             CommunicationId = response.CommunicationId,
                         };
 
                         var payload = JsonConvert.SerializeObject(createdEvent);
                         await conn.ExecuteAsync(
-                            "INSERT INTO Event (RequestId, Key, Payload) VALUES (@RequestId, @Key, @Payload::json)",
-                            new { request.RequestId, Key = "communication.created", payload });
+                            "INSERT INTO Event (EventId, RequestId, Key, Payload) VALUES (@EventId, @RequestId, @Key, @Payload::json)",
+                            new { createdEvent.EventId, request.RequestId, createdEvent.Key, payload });
                     }
+
                     // 5. Commit transaction 1
                     tx.Complete();
                 }
@@ -95,8 +97,8 @@ namespace Api.Features.Communication
                 {
                     // 7. Send all unsent events
                     var factory = new ConnectionFactory() { HostName = settings.MqHostname };
-                    using(var connection = factory.CreateConnection())
-                    using(var channel = connection.CreateModel())
+                    using (var connection = factory.CreateConnection())
+                    using (var channel = connection.CreateModel())
                     {
                         foreach (var e in events)
                         {
@@ -122,7 +124,9 @@ namespace Api.Features.Communication
 
         public class Event
         {
+            public Guid EventId { get; set; }
             public Guid CommunicationId { get; set; }
+            public string Key { get; } = "communication.created";
         }
 
     }
