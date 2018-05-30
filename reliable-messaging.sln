@@ -1,0 +1,19 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.0.0
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "api", "api\api.csproj", "{A3D53E19-BCAB-4D55-8C5C-DECA3B9CFC00}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "backend", "backend\backend.csproj", "{D3BAB62A-1511-40B3-AD73-D44408A7E10E}"
+EndProject
+Global
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A3D53E19-BCAB-4D55-8C5C-DECA3B9CFC00}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3D53E19-BCAB-4D55-8C5C-DECA3B9CFC00}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D3BAB62A-1511-40B3-AD73-D44408A7E10E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D3BAB62A-1511-40B3-AD73-D44408A7E10E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+	EndGlobalSection
+EndGlobal

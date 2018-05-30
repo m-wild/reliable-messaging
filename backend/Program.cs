@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.SqlClient;
 using System.Text;
 using System.Transactions;
 using Dapper;
@@ -11,7 +12,7 @@ namespace Backend
 {
     public class Settings
     {
-        public string DbConnectionString { get; set; } = "Host=localhost; Database=reliableapi; Enlist=true;";
+        public string DbConnectionString { get; set; } = "Data Source=(localdb)\\mssqllocaldb; Initial Catalog=Messaging; Integrated Security=true;";
         public string MqHostname { get; set; } = "localhost";
     }
 
@@ -61,7 +62,7 @@ namespace Backend
 
             // 2. check if we have processed this message already
             BasicEvent existing = null;
-            using (var conn = new NpgsqlConnection(settings.DbConnectionString))
+            using (var conn = new SqlConnection(settings.DbConnectionString))
             {
                 existing = conn.QueryFirstOrDefault(
                     "SELECT * FROM Backend.Processed WHERE EventId = @EventId",
@@ -75,7 +76,7 @@ namespace Backend
                     TransactionScopeOption.RequiresNew, 
                     new TransactionOptions { IsolationLevel = IsolationLevel.ReadCommitted },
                     TransactionScopeAsyncFlowOption.Enabled))
-                using (var conn = new NpgsqlConnection(settings.DbConnectionString))
+                using (var conn = new SqlConnection(settings.DbConnectionString))
                 {
 
                     Console.WriteLine($"Process event {createdEvent.EventId}");

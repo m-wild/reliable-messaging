@@ -1,50 +1,48 @@
 /* -- rollback
-DROP TABLE Backend.Processed;
-DROP SCHEMA Backend;
+DROP DATABASE Messaging;
+*/
+CREATE DATABASE Messaging;
+GO
+USE Messaging;
+GO
+CREATE SCHEMA Api AUTHORIZATION dbo;
+GO
+CREATE TABLE Api.Request (
+    RequestId UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT NEWID(),
+    CreatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
 
-DROP TABLE Communication;
-DROP TABLE Event;
-DROP TABLE Request;
-DROP EXTENSION citext;
-DROP EXTENSION pgcrypto;
+CREATE TABLE Api.Event (
+    EventId UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT NEWID(),
+    RequestId UNIQUEIDENTIFIER NOT NULL REFERENCES Api.Request (RequestId),
+    CreatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    SentAt DATETIME NULL,
+    [Key] VARCHAR(50) NOT NULL,
+    Payload VARCHAR(MAX) NULL
+);
+
+CREATE TABLE Api.Communication (
+    CommunicationId UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT NEWID(),
+    CustomerId UNIQUEIDENTIFIER NOT NULL,
+    TemplateKey VARCHAR(50) NOT NULL,
+    Payload VARCHAR(MAX) NULL
+);
+
+
+/*
+SELECT * FROM Api.Request;
+SELECT * FROM Api.Event;
+SELECT * FROM Api.Communication;
 */
 
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
-CREATE EXTENSION IF NOT EXISTS citext;
-
-CREATE TABLE IF NOT EXISTS Request (
-    RequestId UUID NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
-    CreatedAt TIMESTAMP NOT NULL DEFAULT current_timestamp
-);
-
-CREATE TABLE IF NOT EXISTS Event (
-    EventId UUID NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
-    RequestId UUID NOT NULL REFERENCES Request (RequestId),
-    CreatedAt TIMESTAMP NOT NULL DEFAULT current_timestamp,
-    SentAt TIMESTAMP NULL,
-    Key CITEXT NOT NULL,
-    Payload JSON NULL
-);
-
-CREATE TABLE IF NOT EXISTS Communication (
-    CommunicationId UUID NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
-    CustomerId UUID NOT NULL,
-    TemplateKey CITEXT NOT NULL,
-    Payload CITEXT NULL
-);
-
-
--- SELECT * FROM Request;
--- SELECT * FROM Event;
--- SELECT * FROM Communication;
-
+GO
 CREATE SCHEMA Backend;
-
+GO
 CREATE TABLE Backend.Processed (
-    EventId UUID NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
-    CreatedAt TIMESTAMP NOT NULL DEFAULT current_timestamp
+    EventId UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT NEWID(),
+    CreatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- SELECT * FROM Backend.Processed;
-
-
+/*
+SELECT * FROM Backend.Processed;
+*/

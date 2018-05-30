@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Options;
 using Api.Middleware;
-using Npgsql;
 using Dapper;
 using System.Transactions;
 using Newtonsoft.Json;
@@ -12,6 +11,7 @@ using System.Text;
 using RabbitMQ.Client;
 using System.Collections.Generic;
 using System.Linq;
+using System.Data.SqlClient;
 
 namespace Api.Features.Communication
 {
@@ -48,25 +48,26 @@ namespace Api.Features.Communication
                     TransactionScopeOption.RequiresNew, 
                     new TransactionOptions { IsolationLevel = IsolationLevel.ReadCommitted },
                     TransactionScopeAsyncFlowOption.Enabled))
-                using (var conn = new NpgsqlConnection(settings.DbConnectionString))
+                using (var conn = new SqlConnection(settings.DbConnectionString))
                 {
                     // 1. Check if message has been processed already
                     var existing = await conn.QueryFirstOrDefaultAsync<Middleware.Request>(
-                        "SELECT * FROM Request WHERE RequestId = @RequestId",
+                        "SELECT * FROM Api.Request WHERE RequestId = @RequestId",
                         new { request.RequestId });
                     
                     if (existing == null)
                     {
                         // 2. Save request
                         await conn.ExecuteAsync(
-                            "INSERT INTO Request (RequestId, CreatedAt) VALUES (@RequestId, @CreatedAt)",
+                            "INSERT INTO Api.Request (RequestId, CreatedAt) VALUES (@RequestId, @CreatedAt)",
                             new Middleware.Request(request));
 
 
                         // 3. Process request
                         response = await conn.QuerySingleAsync<Response>(
-                            "INSERT INTO Communication (CustomerId, TemplateKey, Payload) " +
-                            "VALUES (@CustomerId, @TemplateKey, @Payload) RETURNING CommunicationId",
+                            "INSERT INTO Api.Communication (CustomerId, TemplateKey, Payload) " +
+                            "OUTPUT Inserted.CommunicationId " +
+                            "VALUES (@CustomerId, @TemplateKey, @Payload)",
                             new { request.CustomerId, request.TemplateKey, request.Payload });
                             
                         // 4. Save events to DB
@@ -78,7 +79,7 @@ namespace Api.Features.Communication
 
                         var payload = JsonConvert.SerializeObject(createdEvent);
                         await conn.ExecuteAsync(
-                            "INSERT INTO Event (EventId, RequestId, Key, Payload) VALUES (@EventId, @RequestId, @Key, @Payload::json)",
+                            "INSERT INTO Api.Event (EventId, RequestId, [Key], Payload) VALUES (@EventId, @RequestId, @Key, @Payload)",
                             new { createdEvent.EventId, request.RequestId, createdEvent.Key, payload });
                     }
 
@@ -88,9 +89,9 @@ namespace Api.Features.Communication
 
                 // 6. Get all unsent events for the request
                 IEnumerable<Middleware.Event> events;
-                using (var conn = new NpgsqlConnection(settings.DbConnectionString))
+                using (var conn = new SqlConnection(settings.DbConnectionString))
                     events = await conn.QueryAsync<Middleware.Event>(
-                        "SELECT * FROM Event WHERE RequestId = @RequestId AND SentAt IS NULL",
+                        "SELECT * FROM Api.Event WHERE RequestId = @RequestId AND SentAt IS NULL",
                         new { request.RequestId });
 
                 if (events.Any())
@@ -109,9 +110,9 @@ namespace Api.Features.Communication
                                 body: body);
 
                             // 8. Mark each event as sent
-                            using (var conn = new NpgsqlConnection(settings.DbConnectionString))
+                            using (var conn = new SqlConnection(settings.DbConnectionString))
                                 await conn.ExecuteAsync(
-                                    "UPDATE Event SET SentAt = CURRENT_TIMESTAMP WHERE EventId = @EventId",
+                                    "UPDATE Api.Event SET SentAt = CURRENT_TIMESTAMP WHERE EventId = @EventId",
                                     new { e.EventId });
                         }
                     }
